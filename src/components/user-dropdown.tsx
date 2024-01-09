@@ -10,17 +10,19 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { getServerAuthSession } from "@/server/auth";
+import { type getServerAuthSession } from "@/server/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
-export async function UserDropDown() {
-  const session = await getServerAuthSession();
-
+export function UserDropDown({
+  session,
+}: {
+  session: Awaited<ReturnType<typeof getServerAuthSession>>;
+}) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Avatar>
-          <AvatarImage src={session?.user.image!} />
+          <AvatarImage src={session?.user?.image!} />
           <AvatarFallback>{session?.user.name}</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>

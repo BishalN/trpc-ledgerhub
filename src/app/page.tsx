@@ -3,9 +3,9 @@ import NextLink from "next/link";
 import { getServerAuthSession } from "@/server/auth";
 import { api } from "@/trpc/server";
 import { redirect } from "next/navigation";
-import { NavBar } from "./layout";
 import { Button } from "@/components/ui/button";
 import { CreateLedgerDialog } from "@/components/create-ledger-dialog";
+import { NavBar } from "@/components/navbar";
 
 export default async function Home() {
   const session = await getServerAuthSession();
@@ -16,13 +16,13 @@ export default async function Home() {
 
   return (
     <main>
-      <NavBar />
+      <NavBar session={session} />
       {ledgers.length > 0 ? (
         <div>
           <h1 className="my-4 text-3xl font-bold text-white">Your Ledgers:</h1>
           <ul className="my-4">
             {ledgers.map((ledger) => (
-              <NextLink key={ledger.id} href={`/ledger/${ledger.id}`} passHref>
+              <NextLink key={ledger.id} href={`/ledgers/${ledger.id}`} passHref>
                 <li className="cursor-pointer rounded-lg bg-[#D9D9D9] p-4 shadow-md transition-shadow hover:shadow-lg">
                   {ledger.name}
                 </li>

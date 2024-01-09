@@ -4,8 +4,6 @@ import { Inter } from "next/font/google";
 import { cookies } from "next/headers";
 
 import { TRPCReactProvider } from "@/trpc/react";
-import { UserDropDown } from "@/components/user-dropdown";
-import { DrawerMenu } from "@/components/drawer-menu";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -38,14 +36,4 @@ export default function RootLayout({
 
 export function Container({ children }: { children: React.ReactNode }) {
   return <div className="container mx-auto max-w-4xl px-4">{children}</div>;
-}
-
-export async function NavBar() {
-  // TODO: Use a static sidebar instead of drawer
-  return (
-    <div className="flex justify-between pt-4">
-      <DrawerMenu />
-      <UserDropDown />
-    </div>
-  );
 }

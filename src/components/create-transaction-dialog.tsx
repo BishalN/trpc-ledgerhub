@@ -41,11 +41,14 @@ import {
 import { TransactionType } from "@prisma/client";
 import { Textarea } from "./ui/textarea";
 import { useParams, useRouter } from "next/navigation";
+import { ArrowLeftRight } from "lucide-react";
+import React from "react";
 
 export function CreateTransactionDialog() {
   // use params to get the ledger id
-  const { id: ledgerId } = useParams();
+  const { ledgerId } = useParams();
   const router = useRouter();
+  const [open, setOpen] = React.useState(false);
   const createTransaction = api.transaction.create.useMutation({
     onSuccess: () => {
       toast({
@@ -53,6 +56,7 @@ export function CreateTransactionDialog() {
         description: "Transaction Created Successfully",
       });
       router.refresh();
+      setOpen(false);
     },
     onError: (e) => {
       toast({
@@ -85,9 +89,11 @@ export function CreateTransactionDialog() {
   });
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Create Transaction</Button>
+        <Button>
+          <ArrowLeftRight className="mr-2 h-4 w-4" /> Create Transaction
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>

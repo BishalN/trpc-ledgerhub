@@ -1,5 +1,6 @@
 import * as React from "react";
-import { Menu } from "lucide-react";
+import { Factory, Menu, ScanLine, User } from "lucide-react";
+import NextLink from "next/link";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -10,22 +11,25 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 
-export const MenuData = [
-  {
-    label: "Create Transaction",
-  },
-  {
-    label: "Products",
-  },
-  {
-    label: `Customers`,
-  },
-  {
-    label: "Suppliers",
-  },
-];
+export function DrawerMenu({ ledgerId }: { ledgerId: string }) {
+  const MenuData = [
+    {
+      label: "Manage Products",
+      Icon: ScanLine,
+      href: `/ledgers/${ledgerId}/products`,
+    },
+    {
+      label: `Manage Customers`,
+      Icon: User,
+      href: `/ledgers/${ledgerId}/customers`,
+    },
+    {
+      label: "Manage Suppliers",
+      Icon: Factory,
+      href: `/ledgers/${ledgerId}/suppliers`,
+    },
+  ];
 
-export function DrawerMenu() {
   return (
     <Drawer>
       <DrawerTrigger asChild>
@@ -36,7 +40,12 @@ export function DrawerMenu() {
           <DrawerFooter>
             {MenuData.map((item) => (
               <DrawerClose key={item.label} asChild>
-                <Button variant="outline">{item.label}</Button>
+                <Button variant="outline">
+                  <NextLink href={item.href} passHref>
+                    <item.Icon className="mr-2 inline" />
+                    {item.label}
+                  </NextLink>
+                </Button>
               </DrawerClose>
             ))}
           </DrawerFooter>
