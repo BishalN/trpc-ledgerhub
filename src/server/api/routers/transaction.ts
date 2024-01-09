@@ -1,17 +1,17 @@
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { TransactionValidationSchema } from "@/lib/validation";
+import { ServerTransactionValidationSchema } from "@/lib/validation";
 
 export const transactionRouter = createTRPCRouter({
   create: protectedProcedure
-    .input(TransactionValidationSchema)
+    .input(ServerTransactionValidationSchema)
     .mutation(async ({ ctx, input }) => {
       return ctx.db.transaction.create({
         data: {
           amount: input.amount,
           remarks: input.remarks,
-          type: input.type ?? "",
+          type: input.type,
           ledger: { connect: { id: input.ledgerId } },
           // TODO: understand how does this optional relationship works
           customer: input.customerId

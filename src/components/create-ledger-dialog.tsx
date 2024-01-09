@@ -24,13 +24,25 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form";
+import { useRouter } from "next/navigation";
 
 export const LedgerValidationSchema = z.object({
   name: z.string({ required_error: "Name is required" }).min(3),
 });
 
 export function CreateLedgerDialog() {
+  const router = useRouter();
   const createLedger = api.ledger.create.useMutation({
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Ledger Created Successfully",
+      });
+
+      router.refresh();
+      // TODO: close the dialog
+      // refresh the page
+    },
     onError: (e) => {
       toast({
         title: "Error",
