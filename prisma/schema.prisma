@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-    provider = "sqlite"
+    provider = "postgresql"
     // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
     // Further reading:
     // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
@@ -89,8 +89,10 @@ model UserPreferences {
 model Customer {
   id          String @id @default(cuid())
   name        String
-  contact     String
-  description String
+  // { "email": "email@example", "phone": "1234567890", "address": "some address"}
+  contact     Json?
+  description String?
+  avatar      String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -103,14 +105,15 @@ model Customer {
 model Supplier {
   id          String @id @default(cuid())
   name        String
-  contact     String
+  contact     Json?
   description String
+  avatar      String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   transactions Transaction[]
-  products     Product[]
+  products     Product[] @relation("ProductSuppliers")
   Ledger       Ledger?       @relation(fields: [ledgerId], references: [id])
   ledgerId     String?
 }
@@ -133,7 +136,7 @@ model Transaction {
   id String @id @default(cuid())
 
   amount        Float
-  type          String // 'credit', 'debit', 'cash'
+  type          TransactionType // receivable, payable, received, paid
   ledgerId      String
   remarks       String? // A short description of the transaction
   // A transaction can be associated with either a customer or a supplier
@@ -142,6 +145,12 @@ model Transaction {
   supplierId    String?
 
   createdAt DateTime @default(now())
+
+  // having a json field that has the products and their quantities
+  // { "products": [{ "id": "1", "quantity": 2 }, { "id": "2", "quantity": 3 }] }
+  // TODO: validate with zod
+  products    Json[] // optional
+
 
   ledger   Ledger    @relation(fields: [ledgerId], references: [id])
   customer Customer? @relation(fields: [customerId], references: [id])
@@ -152,9 +161,22 @@ model Product {
   id          String  @id @default(cuid())
   name        String
   barcode     String?
-  description String
-  price       Float
+  description String?
+  costPrice   Float
+  sellingPrice Float
+  thumbnail   String?
+  stock       Int     @default(0)
 
-  supplierId String?
-  supplier   Supplier? @relation(fields: [supplierId], references: [id])
+  
+  suppliers Supplier[] @relation("ProductSuppliers")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum TransactionType {
+  RECEIVABLE
+  PAYABLE
+  RECEIVED
+  PAID
 }
