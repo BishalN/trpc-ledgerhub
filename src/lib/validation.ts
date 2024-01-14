@@ -47,3 +47,13 @@ export type TransactionType = z.infer<typeof TransactionValidationSchema>;
 export type ServerTransactionType = z.infer<
   typeof ServerTransactionValidationSchema
 >;
+
+export const CustomerValidationSchema = z.object({
+  ledgerId: z.string({ required_error: "Ledger Id is required" }),
+  name: z.string({ required_error: "Name is required" }).min(3),
+  description: z.string().optional(),
+  avatar: z.string().optional(),
+  email: z.string().optional(),
+  phone: z.string().optional(),
+  address: z.string().optional(),
+});
