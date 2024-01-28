@@ -1,6 +1,5 @@
 import { NavBar } from "@/components/navbar";
 import { Card, CardFooter, CardHeader } from "@/components/ui/card";
-import { CustomerCardMenuDropdown } from "@/components/customer-card-menu-dropdown";
 import { getServerAuthSession } from "@/server/auth";
 import { api } from "@/trpc/server";
 import { formatDistanceToNow } from "date-fns";
@@ -20,6 +19,8 @@ export default async function Home({
   const session = await getServerAuthSession();
   const ledger = await api.ledger.getById.query({ id: params.ledgerId });
   const products = await api.product.getAll.query();
+
+  console.log(products);
 
   if (!ledger) return notFound();
   return (

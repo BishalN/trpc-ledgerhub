@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -25,10 +24,7 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form";
-import {
-  type ServerTransactionType,
-  TransactionValidationSchema,
-} from "@/lib/validation";
+import { TransactionValidationSchema } from "@/lib/validation";
 import {
   Select,
   SelectTrigger,
@@ -71,7 +67,7 @@ export function CreateTransactionDialog() {
   const form = useZodForm({
     schema: TransactionValidationSchema,
     defaultValues: {
-      amount: "0.00",
+      amount: 0,
       type: TransactionType.RECEIVED,
       remarks: "",
       ledgerId: String(ledgerId ?? ""),
@@ -81,9 +77,7 @@ export function CreateTransactionDialog() {
   console.log(form.formState.errors);
 
   const onSubmit = form.handleSubmit(async (values) => {
-    console.log(values);
-    // @ts-expect-error
-    await createTransaction.mutateAsync(values as ServerTransactionType);
+    await createTransaction.mutateAsync(values);
     form.reset();
     // TODO: close the dialog
   });

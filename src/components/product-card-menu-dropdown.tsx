@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { type Product, type Customer } from "@prisma/client";
+import { type Product } from "@prisma/client";
 import { api } from "@/trpc/react";
 import { toast } from "./ui/use-toast";
 
@@ -32,7 +32,8 @@ export const ProductCardMenuDropdown = ({ product }: { product: Product }) => {
   const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   return (
-    <div>
+    // Hack to stop link from opening when clicking on the dropdown
+    <div onClick={(e) => e.stopPropagation()}>
       <DropdownMenu>
         <DropdownMenuTrigger className="inline">
           <MoreVertical className="" />

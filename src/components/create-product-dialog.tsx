@@ -24,13 +24,10 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form";
-import {
-  ClientProductValidationSchema,
-  ServerProductValidationSchema,
-} from "@/lib/validation";
+import { ProductValidationSchema } from "@/lib/validation";
 import { Textarea } from "./ui/textarea";
-import { useParams, useRouter } from "next/navigation";
-import { ArrowLeftRight, Server } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowLeftRight } from "lucide-react";
 import React from "react";
 
 export function CreateProductDialog() {
@@ -55,23 +52,22 @@ export function CreateProductDialog() {
   });
 
   const form = useZodForm({
-    schema: ClientProductValidationSchema,
+    schema: ProductValidationSchema,
     defaultValues: {
       name: "",
       description: "",
-      costPrice: "0",
-      sellingPrice: "0",
-      stock: "0",
+      costPrice: 0,
+      sellingPrice: 0,
+      stock: 0,
       barcode: "",
       thumbnail: "",
     },
   });
 
+  console.log(form.formState.errors);
+
   const onSubmit = form.handleSubmit(async (values) => {
-    console.log(values);
-    const res = ServerProductValidationSchema.parse(values);
-    console.log(res);
-    await createProduct.mutateAsync(res);
+    await createProduct.mutateAsync(values);
     form.reset();
     // TODO: close the dialog
   });

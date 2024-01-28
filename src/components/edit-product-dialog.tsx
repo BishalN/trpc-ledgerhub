@@ -8,7 +8,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { api } from "@/trpc/react";
@@ -24,14 +23,9 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form";
-import {
-  ClientProductValidationSchema,
-  ServerProductUpdateValidationSchema,
-  ServerProductValidationSchema,
-} from "@/lib/validation";
+import { ProductUpdateValidationSchema } from "@/lib/validation";
 import { Textarea } from "./ui/textarea";
-import { useParams, useRouter } from "next/navigation";
-import { ArrowLeftRight, Server } from "lucide-react";
+import { useRouter } from "next/navigation";
 import React from "react";
 import { type Product } from "@prisma/client";
 
@@ -63,36 +57,30 @@ export function EditProductDialog({
     },
   });
 
+  console.log(`product in edit dialog ${JSON.stringify(product, null, 2)}`);
+
   const form = useZodForm({
-    schema: ClientProductValidationSchema,
+    schema: ProductUpdateValidationSchema,
     defaultValues: {
-      id: product.id,
       name: product.name,
       description: product.description ?? "",
-      costPrice: String(product.costPrice),
-      sellingPrice: String(product.sellingPrice),
-      stock: String(product.stock),
+      costPrice: product.costPrice,
+      sellingPrice: product.sellingPrice,
+      stock: product.stock,
       barcode: product.barcode ?? "",
       thumbnail: product.thumbnail ?? "",
+      id: product.id,
     },
   });
 
+  console.log(form.formState.errors);
+
   const onSubmit = form.handleSubmit(async (values) => {
-    console.log(values);
-    const res = ServerProductUpdateValidationSchema.parse(values);
-    console.log(res);
-    await createProduct.mutateAsync(res);
-    form.reset();
-    // TODO: close the dialog
+    await createProduct.mutateAsync(values);
   });
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <ArrowLeftRight className="mr-2 h-4 w-4" /> Edit Product
-        </Button>
-      </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Edit Product</DialogTitle>

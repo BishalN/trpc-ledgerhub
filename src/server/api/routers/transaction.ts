@@ -1,11 +1,11 @@
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { ServerTransactionValidationSchema } from "@/lib/validation";
+import { TransactionValidationSchema } from "@/lib/validation";
 
 export const transactionRouter = createTRPCRouter({
   create: protectedProcedure
-    .input(ServerTransactionValidationSchema)
+    .input(TransactionValidationSchema)
     .mutation(async ({ ctx, input }) => {
       return ctx.db.transaction.create({
         data: {

@@ -2,13 +2,13 @@ import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import {
-  ServerProductUpdateValidationSchema,
-  ServerProductValidationSchema,
+  ProductUpdateValidationSchema,
+  ProductValidationSchema,
 } from "@/lib/validation";
 
 export const productRouter = createTRPCRouter({
   create: protectedProcedure
-    .input(ServerProductValidationSchema)
+    .input(ProductValidationSchema)
     .mutation(async ({ ctx, input }) => {
       return ctx.db.product.create({
         data: {
@@ -30,7 +30,7 @@ export const productRouter = createTRPCRouter({
     return ctx.db.product.findMany();
   }),
 
-  getAllById: protectedProcedure
+  getById: protectedProcedure
     .input(
       z.object({
         id: z.string({ required_error: "ProductId is required" }),
@@ -39,11 +39,28 @@ export const productRouter = createTRPCRouter({
     .query(({ ctx, input }) => {
       return ctx.db.product.findUnique({
         where: { id: input.id },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          costPrice: true,
+          sellingPrice: true,
+          stock: true,
+          thumbnail: true,
+          barcode: true,
+          suppliers: {
+            select: {
+              id: true,
+              name: true,
+              contact: true,
+            },
+          },
+        },
       });
     }),
 
   update: protectedProcedure
-    .input(ServerProductUpdateValidationSchema)
+    .input(ProductUpdateValidationSchema)
     .mutation(async ({ ctx, input }) => {
       const product = await ctx.db.product.findUnique({
         where: { id: input.id },

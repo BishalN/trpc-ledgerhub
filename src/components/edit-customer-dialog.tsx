@@ -77,8 +77,6 @@ export function EditCustomerDialog({
   const onSubmit = form.handleSubmit(async (values) => {
     console.log(values);
     await updateCustomer.mutateAsync(values);
-    form.reset();
-    // TODO: close the dialog
   });
 
   return (
