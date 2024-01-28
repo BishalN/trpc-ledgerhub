@@ -56,6 +56,14 @@ export const supplierRouter = createTRPCRouter({
       });
     }),
 
+  getSupplierByName: protectedProcedure
+    .input(z.object({ name: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return ctx.db.supplier.findMany({
+        where: { name: { contains: input.name, mode: "insensitive" } },
+      });
+    }),
+
   update: protectedProcedure
     .input(UpdateSupplierValidationSchema)
     .mutation(async ({ ctx, input }) => {

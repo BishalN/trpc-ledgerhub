@@ -59,6 +59,14 @@ export const productRouter = createTRPCRouter({
       });
     }),
 
+  getProductByName: protectedProcedure
+    .input(z.object({ name: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return ctx.db.product.findMany({
+        where: { name: { contains: input.name, mode: "insensitive" } },
+      });
+    }),
+
   update: protectedProcedure
     .input(ProductUpdateValidationSchema)
     .mutation(async ({ ctx, input }) => {

@@ -45,6 +45,14 @@ export const customerRouter = createTRPCRouter({
       });
     }),
 
+  getCustomerByName: protectedProcedure
+    .input(z.object({ name: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return ctx.db.customer.findMany({
+        where: { name: { contains: input.name, mode: "insensitive" } },
+      });
+    }),
+
   update: protectedProcedure
     .input(UpdateCustomerValidationSchema)
     .mutation(async ({ ctx, input }) => {

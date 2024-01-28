@@ -23,7 +23,11 @@ export const TransactionValidationSchema = z.object({
   customerId: z.string().optional(),
   ledgerId: z.string(),
   supplierId: z.string().optional(),
-  // products: z.array(ProductValidationSchema).optional(),
+  products: z
+    .array(z.object({ id: z.string(), quantity: z.coerce.number().min(1) }))
+    .optional(),
+  // TODO: add refine to handle the case when type is receivable or payable then customerId is required
+  // else supplierId is required
 });
 
 export const UpdateTransactionValidationSchema =
