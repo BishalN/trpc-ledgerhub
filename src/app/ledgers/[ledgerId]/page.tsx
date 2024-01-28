@@ -38,11 +38,13 @@ export default async function LedgerPage({
                   <div>
                     $ {transaction.amount} {transaction.type}
                   </div>
-                  <TransactionItemDropDownMenu transactionId={transaction.id} />
+                  <TransactionItemDropDownMenu transaction={transaction} />
                 </CardHeader>
                 {transaction.remarks && (
                   <CardContent>
-                    <div>{transaction.remarks}</div>
+                    <div className="text-sm text-gray-500">
+                      {transaction.remarks}
+                    </div>
                   </CardContent>
                 )}
                 <CardFooter>

@@ -8,7 +8,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { api } from "@/trpc/react";
@@ -24,32 +23,38 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form";
-import { TransactionValidationSchema } from "@/lib/validation";
+import { UpdateTransactionValidationSchema } from "@/lib/validation";
+import { Textarea } from "./ui/textarea";
+import { useParams, useRouter } from "next/navigation";
+import React from "react";
+import { type Transaction, TransactionType } from "@prisma/client";
 import {
   Select,
-  SelectTrigger,
   SelectContent,
   SelectGroup,
   SelectItem,
   SelectLabel,
+  SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { TransactionType } from "@prisma/client";
-import { Textarea } from "./ui/textarea";
-import { useParams, useRouter } from "next/navigation";
-import { ArrowLeftRight } from "lucide-react";
-import React from "react";
 
-export function CreateTransactionDialog() {
-  // use params to get the ledger id
-  const { ledgerId } = useParams();
+export function EditTransactionDialog({
+  transaction,
+  open,
+  setOpen,
+}: {
+  transaction: Transaction;
+  open: boolean;
+  setOpen: (open: boolean) => void;
+}) {
   const router = useRouter();
-  const [open, setOpen] = React.useState(false);
-  const createTransaction = api.transaction.create.useMutation({
+  const { ledgerId } = useParams();
+
+  const updateTransaction = api.transaction.update.useMutation({
     onSuccess: () => {
       toast({
         title: "Success",
-        description: "Transaction Created Successfully",
+        description: "Transaction Updated Successfully",
       });
       router.refresh();
       setOpen(false);
@@ -63,33 +68,31 @@ export function CreateTransactionDialog() {
   });
 
   const form = useZodForm({
-    schema: TransactionValidationSchema,
+    schema: UpdateTransactionValidationSchema,
     defaultValues: {
-      amount: 0,
-      type: TransactionType.RECEIVED,
-      remarks: "",
+      amount: transaction.amount,
+      type: transaction.type,
+      remarks: transaction.remarks as TransactionType,
       ledgerId: String(ledgerId ?? ""),
+      transactionId: transaction.id,
+      customerId: transaction.customerId ?? "",
+      supplierId: transaction.supplierId ?? "",
     },
   });
 
+  console.log(form.formState.errors);
+
   const onSubmit = form.handleSubmit(async (values) => {
-    await createTransaction.mutateAsync(values);
-    form.reset();
-    // TODO: close the dialog
+    await updateTransaction.mutateAsync(values);
   });
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <ArrowLeftRight className="mr-2 h-4 w-4" /> Create Transaction
-        </Button>
-      </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create Transaction</DialogTitle>
+          <DialogTitle>Edit Transaction</DialogTitle>
           <DialogDescription>
-            Enter details of your transaction
+            Update details of your transaction
           </DialogDescription>
         </DialogHeader>
 

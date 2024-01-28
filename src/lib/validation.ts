@@ -15,21 +15,19 @@ export const ProductUpdateValidationSchema = ProductValidationSchema.merge(
   z.object({ id: z.string() }),
 );
 
-export const TransactionValidationSchema = z
-  .object({
-    amount: z.coerce.number().min(1),
-    // TODO: use directly from prisma client type
-    type: z.enum(["RECEIVABLE", "PAYABLE", "RECEIVED", "PAID"]),
-    remarks: z.string().optional(),
-    customerId: z.string().optional(),
-    ledgerId: z.string(),
-    supplierId: z.string().optional(),
-    // products: z.array(ProductValidationSchema).optional(),
-  })
-  .transform((data) => ({
-    ...data,
-    amount: Number(data.amount),
-  }));
+export const TransactionValidationSchema = z.object({
+  amount: z.coerce.number().min(1),
+  // TODO: use directly from prisma client type
+  type: z.enum(["RECEIVABLE", "PAYABLE", "RECEIVED", "PAID"]),
+  remarks: z.string().optional(),
+  customerId: z.string().optional(),
+  ledgerId: z.string(),
+  supplierId: z.string().optional(),
+  // products: z.array(ProductValidationSchema).optional(),
+});
+
+export const UpdateTransactionValidationSchema =
+  TransactionValidationSchema.merge(z.object({ transactionId: z.string() }));
 
 export type TransactionType = z.infer<typeof TransactionValidationSchema>;
 

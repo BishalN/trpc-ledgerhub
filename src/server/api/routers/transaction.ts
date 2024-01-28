@@ -1,7 +1,10 @@
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { TransactionValidationSchema } from "@/lib/validation";
+import {
+  TransactionValidationSchema,
+  UpdateTransactionValidationSchema,
+} from "@/lib/validation";
 
 export const transactionRouter = createTRPCRouter({
   create: protectedProcedure
@@ -46,6 +49,32 @@ export const transactionRouter = createTRPCRouter({
       });
     }),
 
+  update: protectedProcedure
+    .input(UpdateTransactionValidationSchema)
+    .mutation(async ({ ctx, input }) => {
+      const transaction = await ctx.db.transaction.findUnique({
+        where: { id: input.transactionId },
+        select: { ledger: { select: { ownerId: true } } },
+      });
+
+      if (!transaction) {
+        throw new Error("transaction not found");
+      }
+
+      if (transaction.ledger?.ownerId !== ctx.session.user.id) {
+        throw new Error("not authorized");
+      }
+
+      return ctx.db.transaction.update({
+        where: { id: input.transactionId },
+        data: {
+          amount: input.amount,
+          remarks: input.remarks,
+          type: input.type,
+        },
+      });
+    }),
+
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -60,7 +89,7 @@ export const transactionRouter = createTRPCRouter({
       // if (transaction.id !== ctx.session.user.id) {
       //   throw new Error("not authorized");
       // }
-      return ctx.db.ledger.delete({
+      return ctx.db.transaction.delete({
         where: { id: input.id },
       });
     }),
