@@ -4,6 +4,7 @@ import { api } from "@/trpc/server";
 import { TransactionItemDropDownMenu } from "@/components/transaction-dropdown-menu";
 import { NavBar } from "@/components/navbar";
 import { getServerAuthSession } from "@/server/auth";
+import { EmptyTransactionState } from "@/components/empty-transaction-state";
 
 export default async function LedgerPage({
   params,
@@ -51,10 +52,7 @@ export default async function LedgerPage({
           })}
         </div>
       ) : (
-        <div className="rounded-lg bg-gray-500 p-4 text-center">
-          <p>No Transactions.</p>
-          <CreateTransactionDialog />
-        </div>
+        <EmptyTransactionState />
       )}
     </main>
   );

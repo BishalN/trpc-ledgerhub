@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CreateLedgerDialog } from "@/components/create-ledger-dialog";
 import { NavBar } from "@/components/navbar";
+import { EmptyLedgerState } from "@/components/empty-ledger-state";
 
 export default async function Home() {
   const session = await getServerAuthSession();
@@ -31,20 +32,8 @@ export default async function Home() {
           </ul>
         </div>
       ) : (
-        <div className="my-10  space-y-2 rounded-lg bg-[#D9D9D9] p-4 text-center font-bold">
-          <p>No Ledger Associated with your account found</p>
-          <CreateLedgerDialog />
-        </div>
+        <EmptyLedgerState />
       )}
     </main>
-  );
-}
-
-export function LedgerEmptyState() {
-  return (
-    <div className="my-10  space-y-2 rounded-lg bg-[#D9D9D9] p-4 text-center font-bold">
-      <p>No Ledger Associated with your account found</p>
-      <Button>Create Ledger</Button>
-    </div>
   );
 }

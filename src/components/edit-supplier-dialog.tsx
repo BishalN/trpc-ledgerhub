@@ -23,30 +23,28 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form";
-import { UpdateCustomerValidationSchema } from "@/lib/validation";
+import { UpdateSupplierValidationSchema } from "@/lib/validation";
 import { Textarea } from "./ui/textarea";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import React from "react";
-import { type Customer } from "@prisma/client";
+import { type Supplier } from "@prisma/client";
 
-export function EditCustomerDialog({
-  customer,
+export function EditSupplierDialog({
+  supplier,
   open,
   setOpen,
 }: {
-  customer: Customer;
+  supplier: Supplier;
   open: boolean;
   setOpen: (open: boolean) => void;
 }) {
   const router = useRouter();
 
-  console.log(customer);
-
-  const updateCustomer = api.customer.update.useMutation({
+  const updateSupplier = api.supplier.update.useMutation({
     onSuccess: () => {
       toast({
         title: "Success",
-        description: "Customer Updated Successfully",
+        description: "Supplier Updated Successfully",
       });
       router.refresh();
       setOpen(false);
@@ -60,31 +58,28 @@ export function EditCustomerDialog({
   });
 
   const form = useZodForm({
-    schema: UpdateCustomerValidationSchema,
+    schema: UpdateSupplierValidationSchema,
     defaultValues: {
-      ledgerId: customer.ledgerId,
-      name: customer.name,
-      description: customer.description ?? "",
-      customerId: customer.id,
+      ledgerId: supplier.ledgerId,
+      name: supplier.name,
+      description: supplier.description ?? "",
+      supplierId: supplier.id,
       // email: customer.email,
       // phone: customer.phone,
       // address: customer.address,
     },
   });
 
-  console.log(form.formState.errors);
-
   const onSubmit = form.handleSubmit(async (values) => {
-    console.log(values);
-    await updateCustomer.mutateAsync(values);
+    await updateSupplier.mutateAsync(values);
   });
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Edit Customer</DialogTitle>
-          <DialogDescription>Enter details of your customer</DialogDescription>
+          <DialogTitle>Edit Supplier</DialogTitle>
+          <DialogDescription>Enter details of your supplier</DialogDescription>
         </DialogHeader>
 
         <Form {...form}>

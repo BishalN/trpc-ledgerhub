@@ -106,7 +106,7 @@ model Supplier {
   id          String @id @default(cuid())
   name        String
   contact     Json?
-  description String
+  description String?
   avatar      String?
 
   createdAt DateTime @default(now())
@@ -114,7 +114,7 @@ model Supplier {
 
   transactions Transaction[]
   products     Product[] @relation("ProductSuppliers")
-  Ledger       Ledger?       @relation(fields: [ledgerId], references: [id])
+  ledger       Ledger?       @relation(fields: [ledgerId], references: [id])
   ledgerId     String?
 }
 

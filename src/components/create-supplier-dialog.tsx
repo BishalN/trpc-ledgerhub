@@ -8,6 +8,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { api } from "@/trpc/react";
@@ -23,30 +24,22 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form";
-import { UpdateCustomerValidationSchema } from "@/lib/validation";
+import { SupplierValidationSchema } from "@/lib/validation";
 import { Textarea } from "./ui/textarea";
 import { useParams, useRouter } from "next/navigation";
+import { ArrowLeftRight } from "lucide-react";
 import React from "react";
-import { type Customer } from "@prisma/client";
 
-export function EditCustomerDialog({
-  customer,
-  open,
-  setOpen,
-}: {
-  customer: Customer;
-  open: boolean;
-  setOpen: (open: boolean) => void;
-}) {
+export function CreateSupplierDialog() {
+  // use params to get the ledger id
+  const { ledgerId } = useParams();
   const router = useRouter();
-
-  console.log(customer);
-
-  const updateCustomer = api.customer.update.useMutation({
+  const [open, setOpen] = React.useState(false);
+  const createSupplier = api.supplier.create.useMutation({
     onSuccess: () => {
       toast({
         title: "Success",
-        description: "Customer Updated Successfully",
+        description: "Supplier Created Successfully",
       });
       router.refresh();
       setOpen(false);
@@ -60,31 +53,36 @@ export function EditCustomerDialog({
   });
 
   const form = useZodForm({
-    schema: UpdateCustomerValidationSchema,
+    schema: SupplierValidationSchema,
     defaultValues: {
-      ledgerId: customer.ledgerId,
-      name: customer.name,
-      description: customer.description ?? "",
-      customerId: customer.id,
-      // email: customer.email,
-      // phone: customer.phone,
-      // address: customer.address,
+      ledgerId: String(ledgerId ?? ""),
+      name: "",
+      description: "",
+      phone: "",
+      address: "",
+      avatar: "",
+      email: "",
     },
   });
 
-  console.log(form.formState.errors);
-
   const onSubmit = form.handleSubmit(async (values) => {
     console.log(values);
-    await updateCustomer.mutateAsync(values);
+    await createSupplier.mutateAsync(values);
+    form.reset();
+    // TODO: close the dialog
   });
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button>
+          <ArrowLeftRight className="mr-2 h-4 w-4" /> Create Supplier
+        </Button>
+      </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Edit Customer</DialogTitle>
-          <DialogDescription>Enter details of your customer</DialogDescription>
+          <DialogTitle>Create Supplier</DialogTitle>
+          <DialogDescription>Enter details of your supplier</DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
@@ -182,7 +180,7 @@ export function EditCustomerDialog({
               {/* <Button type="button" variant="outline">
                 Cancel
               </Button> */}
-              <Button type="submit">Update</Button>
+              <Button type="submit">Create</Button>
             </DialogFooter>
           </form>
         </Form>

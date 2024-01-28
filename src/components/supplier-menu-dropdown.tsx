@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { type Customer } from "@prisma/client";
+import { type Supplier } from "@prisma/client";
 import { api } from "@/trpc/react";
 import { toast } from "./ui/use-toast";
 
@@ -26,13 +26,9 @@ import {
 } from "./ui/alert-dialog";
 import { Button } from "./ui/button";
 import { useState } from "react";
-import { EditCustomerDialog } from "./edit-customer-dialog";
+import { EditSupplierDialog } from "./edit-supplier-dialog";
 
-export const CustomerCardMenuDropdown = ({
-  customer,
-}: {
-  customer: Customer;
-}) => {
+export const SupplierMenuDropdown = ({ supplier }: { supplier: Supplier }) => {
   const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   return (
@@ -42,12 +38,12 @@ export const CustomerCardMenuDropdown = ({
           <MoreVertical className="" />
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuLabel>Manage Customer</DropdownMenuLabel>
+          <DropdownMenuLabel>Manage Supplier</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem>
             <Button variant="outline" onClick={() => setEditOpen(!editOpen)}>
               <Trash className="mr-2 h-4 w-4" />
-              Edit Customer
+              Edit Supplier
             </Button>
           </DropdownMenuItem>
           <DropdownMenuItem>
@@ -56,7 +52,7 @@ export const CustomerCardMenuDropdown = ({
               onClick={() => setDeleteAlertOpen(!deleteAlertOpen)}
             >
               <Trash className="mr-2 h-4 w-4" />
-              Delete Customer
+              Delete Supplier
             </Button>
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -64,32 +60,32 @@ export const CustomerCardMenuDropdown = ({
       <DeleteCustomerAlertDialog
         open={deleteAlertOpen}
         setOpen={setDeleteAlertOpen}
-        customerId={customer.id}
+        supplierId={supplier.id}
       />
-      <EditCustomerDialog
+      <EditSupplierDialog
         open={editOpen}
         setOpen={setEditOpen}
-        customer={customer}
+        supplier={supplier}
       />
     </div>
   );
 };
 
 export const DeleteCustomerAlertDialog = ({
-  customerId,
+  supplierId,
   open,
   setOpen,
 }: {
-  customerId: string;
+  supplierId: string;
   open?: boolean;
   setOpen?: (open: boolean) => void;
 }) => {
   const router = useRouter();
-  const deleteCustomer = api.customer.delete.useMutation({
+  const deleteSupplier = api.supplier.delete.useMutation({
     onSuccess: () => {
       toast({
         title: "Success",
-        description: "Customer Deleted Successfully",
+        description: "Supplier Deleted Successfully",
       });
       router.refresh();
     },
@@ -101,8 +97,8 @@ export const DeleteCustomerAlertDialog = ({
     },
   });
 
-  const handleCustomerDelete = async () => {
-    await deleteCustomer.mutateAsync({ customerId });
+  const handleSupplierDelete = async () => {
+    await deleteSupplier.mutateAsync({ supplierId });
   };
 
   return (
@@ -117,7 +113,7 @@ export const DeleteCustomerAlertDialog = ({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={handleCustomerDelete}>
+          <AlertDialogAction onClick={handleSupplierDelete}>
             Continue
           </AlertDialogAction>
         </AlertDialogFooter>

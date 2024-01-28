@@ -2,25 +2,27 @@ import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import {
-  CustomerValidationSchema,
-  UpdateCustomerValidationSchema,
+  SupplierValidationSchema,
+  UpdateSupplierValidationSchema,
 } from "@/lib/validation";
 
-export const customerRouter = createTRPCRouter({
+export const supplierRouter = createTRPCRouter({
   create: protectedProcedure
-    .input(CustomerValidationSchema)
+    .input(SupplierValidationSchema)
     .mutation(async ({ ctx, input }) => {
-      return ctx.db.customer.create({
+      return ctx.db.supplier.create({
         data: {
           name: input.name,
-          description: input.description,
+          description: input.description ?? "",
           avatar: input.avatar,
           contact: JSON.stringify({
             email: input?.email,
             phone: input?.phone,
             address: input?.address,
           }),
-          ledger: { connect: { id: input.ledgerId } },
+          ledger: {
+            connect: { id: input.ledgerId },
+          },
         },
       });
     }),
@@ -32,34 +34,34 @@ export const customerRouter = createTRPCRouter({
       }),
     )
     .query(({ ctx, input }) => {
-      return ctx.db.customer.findMany({
+      return ctx.db.supplier.findMany({
         where: { ledgerId: input.ledgerId },
       });
     }),
 
-  getByCustomerId: protectedProcedure
-    .input(z.object({ customerId: z.string() }))
+  getBySupplierId: protectedProcedure
+    .input(z.object({ supplierId: z.string() }))
     .query(async ({ ctx, input }) => {
-      return ctx.db.customer.findUnique({
-        where: { id: input.customerId },
+      return ctx.db.supplier.findUnique({
+        where: { id: input.supplierId },
       });
     }),
 
   update: protectedProcedure
-    .input(UpdateCustomerValidationSchema)
+    .input(UpdateSupplierValidationSchema)
     .mutation(async ({ ctx, input }) => {
-      const customer = await ctx.db.customer.findUnique({
-        where: { id: input.customerId },
+      const supplier = await ctx.db.supplier.findUnique({
+        where: { id: input.supplierId },
         include: { ledger: true },
       });
-      if (!customer) {
-        throw new Error("customer not found");
+      if (!supplier) {
+        throw new Error("supplier not found");
       }
-      if (customer.ledger?.ownerId !== ctx.session.user.id) {
+      if (supplier.ledger?.ownerId !== ctx.session.user.id) {
         throw new Error("not authorized");
       }
-      return ctx.db.customer.update({
-        where: { id: input.customerId },
+      return ctx.db.supplier.update({
+        where: { id: input.supplierId },
         data: {
           name: input.name,
           description: input.description,
@@ -74,20 +76,20 @@ export const customerRouter = createTRPCRouter({
     }),
 
   delete: protectedProcedure
-    .input(z.object({ customerId: z.string() }))
+    .input(z.object({ supplierId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const customer = await ctx.db.customer.findUnique({
-        where: { id: input.customerId },
+      const supplier = await ctx.db.supplier.findUnique({
+        where: { id: input.supplierId },
         include: { ledger: true },
       });
-      if (!customer) {
-        throw new Error("customer not found");
+      if (!supplier) {
+        throw new Error("supplier not found");
       }
-      if (customer.ledger?.ownerId !== ctx.session.user.id) {
+      if (supplier.ledger?.ownerId !== ctx.session.user.id) {
         throw new Error("not authorized");
       }
-      return ctx.db.customer.delete({
-        where: { id: input.customerId },
+      return ctx.db.supplier.delete({
+        where: { id: input.supplierId },
       });
     }),
 });

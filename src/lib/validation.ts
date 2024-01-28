@@ -17,10 +17,10 @@ export const ProductUpdateValidationSchema = ProductValidationSchema.merge(
 
 export const TransactionValidationSchema = z
   .object({
-    amount: z.coerce.number(),
+    amount: z.coerce.number().min(1),
     // TODO: use directly from prisma client type
     type: z.enum(["RECEIVABLE", "PAYABLE", "RECEIVED", "PAID"]),
-    remarks: z.string().min(3).optional(),
+    remarks: z.string().optional(),
     customerId: z.string().optional(),
     ledgerId: z.string(),
     supplierId: z.string().optional(),
@@ -44,5 +44,19 @@ export const CustomerValidationSchema = z.object({
 });
 
 export const UpdateCustomerValidationSchema = CustomerValidationSchema.merge(
-  z.object({ userId: z.string() }),
+  z.object({ customerId: z.string() }),
+);
+
+export const SupplierValidationSchema = z.object({
+  ledgerId: z.string({ required_error: "Ledger Id is required" }),
+  name: z.string({ required_error: "Name is required" }).min(3),
+  description: z.string().optional(),
+  avatar: z.string().optional(),
+  email: z.string().optional(),
+  phone: z.string().optional(),
+  address: z.string().optional(),
+});
+
+export const UpdateSupplierValidationSchema = SupplierValidationSchema.merge(
+  z.object({ supplierId: z.string() }),
 );
