@@ -44,6 +44,15 @@ export const supplierRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       return ctx.db.supplier.findUnique({
         where: { id: input.supplierId },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          avatar: true,
+          contact: true,
+          ledger: true,
+          products: true,
+        },
       });
     }),
 
