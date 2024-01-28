@@ -5,6 +5,13 @@ import { TransactionItemDropDownMenu } from "@/components/transaction-dropdown-m
 import { NavBar } from "@/components/navbar";
 import { getServerAuthSession } from "@/server/auth";
 import { EmptyTransactionState } from "@/components/empty-transaction-state";
+import { notFound } from "next/navigation";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
 
 export default async function LedgerPage({
   params,
@@ -13,41 +20,36 @@ export default async function LedgerPage({
 }) {
   const session = await getServerAuthSession();
   const ledger = await api.ledger.getById.query({ id: params.ledgerId });
-  // TODO: show 404 if ledger is null
-  if (!ledger) return null;
+  if (!ledger) return notFound();
+
   return (
     <main className="text-white">
       <NavBar session={session} />
       <CreateTransactionDialog />
       <h1 className="my-4 text-4xl font-bold">{ledger.name}</h1>
 
-      <p className="mt-6 text-lg font-semibold">Recent Transactions</p>
+      <p className="text-lg font-semibold">Recent Transactions</p>
       {ledger.transactions.length > 0 ? (
         <div className="space-y-4">
           {ledger.transactions.map((transaction) => {
             return (
-              <div
-                className="space-x-2 rounded-lg bg-gray-200 px-4 py-2 text-gray-600"
-                key={transaction.id}
-              >
-                <span className="text-2xl text-green-700">
-                  $ {transaction.amount}
-                </span>
-                <span>{transaction.type}</span>
-                <TransactionItemDropDownMenu transactionId={transaction.id} />
-                {/* <span>
-                  {transaction.type === "RECEIVABLE" ||
-                  transaction.type === "RECEIVED"
-                    ? "from"
-                    : "to"}
-                </span> */}
-
-                <div>{transaction.remarks}</div>
-                <div>
+              <Card key={transaction.id}>
+                <CardHeader className="flex flex-row items-baseline justify-between">
+                  <div>
+                    $ {transaction.amount} {transaction.type}
+                  </div>
+                  <TransactionItemDropDownMenu transactionId={transaction.id} />
+                </CardHeader>
+                {transaction.remarks && (
+                  <CardContent>
+                    <div>{transaction.remarks}</div>
+                  </CardContent>
+                )}
+                <CardFooter>
                   created {formatDistanceToNow(new Date(transaction.createdAt))}{" "}
                   ago
-                </div>
-              </div>
+                </CardFooter>
+              </Card>
             );
           })}
         </div>
