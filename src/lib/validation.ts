@@ -1,20 +1,31 @@
 import { z } from "zod";
 
-// Extract the enum zod type using transaction type
+export const ClientProductValidationSchema = z.object({
+  name: z.string().min(3),
+  costPrice: z.string(),
+  sellingPrice: z.string(),
+  stock: z.string(),
+  description: z.string().optional(),
+  thumbnail: z.string().optional(),
+  barcode: z.string().optional(),
+  supplierIds: z.array(z.string()).optional(),
+  id: z.string().optional(),
+});
 
-export const ProductValidationSchema = z
-  .object({
-    name: z.string().min(3),
-    price: z.string(),
-    quantity: z.string(),
-  })
-  .transform((data) => ({
-    ...data,
-    price: Number(data.price),
-    quantity: Number(data.quantity),
-  }));
+export const ServerProductValidationSchema = z.object({
+  name: z.string().min(3),
+  costPrice: z.number(),
+  sellingPrice: z.number(),
+  stock: z.number(),
+  description: z.string().optional(),
+  thumbnail: z.string().optional(),
+  barcode: z.string().optional(),
+  supplierIds: z.array(z.string()).optional(),
+});
 
-// start number as string to avoid error than transform to number
+export const ServerProductUpdateValidationSchema =
+  ServerProductValidationSchema.merge(z.object({ id: z.string() }));
+
 export const TransactionValidationSchema = z
   .object({
     amount: z.string(),
@@ -24,7 +35,7 @@ export const TransactionValidationSchema = z
     customerId: z.string().optional(),
     ledgerId: z.string(),
     supplierId: z.string().optional(),
-    products: z.array(ProductValidationSchema).optional(),
+    // products: z.array(ProductValidationSchema).optional(),
   })
   .transform((data) => ({
     ...data,
@@ -40,7 +51,7 @@ export const ServerTransactionValidationSchema = z.object({
   customerId: z.string().optional(),
   ledgerId: z.string(),
   supplierId: z.string().optional(),
-  products: z.array(ProductValidationSchema).optional(),
+  // products: z.array(ProductValidationSchema).optional(),
 });
 
 export type TransactionType = z.infer<typeof TransactionValidationSchema>;
