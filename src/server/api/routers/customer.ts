@@ -1,7 +1,10 @@
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { CustomerValidationSchema } from "@/lib/validation";
+import {
+  CustomerValidationSchema,
+  UpdateCustomerValidationSchema,
+} from "@/lib/validation";
 
 export const customerRouter = createTRPCRouter({
   create: protectedProcedure
@@ -43,7 +46,7 @@ export const customerRouter = createTRPCRouter({
     }),
 
   update: protectedProcedure
-    .input(CustomerValidationSchema.merge(z.object({ userId: z.string() })))
+    .input(UpdateCustomerValidationSchema)
     .mutation(async ({ ctx, input }) => {
       const customer = await ctx.db.customer.findUnique({
         where: { id: input.userId },

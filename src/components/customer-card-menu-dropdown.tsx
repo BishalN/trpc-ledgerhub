@@ -1,6 +1,6 @@
 "use client";
 
-import { MoreVertical, Pencil, Trash } from "lucide-react";
+import { MoreVertical, Trash } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +13,7 @@ import { type Customer } from "@prisma/client";
 import { api } from "@/trpc/react";
 import { toast } from "./ui/use-toast";
 
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,10 +23,10 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "./ui/alert-dialog";
 import { Button } from "./ui/button";
 import { useState } from "react";
+import { EditCustomerDialog } from "./edit-customer-dialog";
 
 export const CustomerCardMenuDropdown = ({
   customer,
@@ -34,24 +34,7 @@ export const CustomerCardMenuDropdown = ({
   customer: Customer;
 }) => {
   const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
-  const { ledgerId } = useParams();
-  const router = useRouter();
-  const updateCustomer = api.customer.update.useMutation({
-    onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Customer Updated Successfully",
-      });
-      router.refresh();
-    },
-    onError: (e) => {
-      toast({
-        title: "Error",
-        description: e.message,
-      });
-    },
-  });
-
+  const [editOpen, setEditOpen] = useState(false);
   return (
     <div>
       <DropdownMenu>
@@ -62,8 +45,10 @@ export const CustomerCardMenuDropdown = ({
           <DropdownMenuLabel>Manage Customer</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem>
-            <Pencil className="mr-2 h-4 w-4" />
-            Edit Customer
+            <Button variant="outline" onClick={() => setEditOpen(!editOpen)}>
+              <Trash className="mr-2 h-4 w-4" />
+              Edit Customer
+            </Button>
           </DropdownMenuItem>
           <DropdownMenuItem>
             <Button
@@ -81,6 +66,11 @@ export const CustomerCardMenuDropdown = ({
         setOpen={setDeleteAlertOpen}
         customerId={customer.id}
       />
+      <EditCustomerDialog
+        open={editOpen}
+        setOpen={setEditOpen}
+        customer={customer}
+      />
     </div>
   );
 };
@@ -94,14 +84,14 @@ export const DeleteCustomerAlertDialog = ({
   open?: boolean;
   setOpen?: (open: boolean) => void;
 }) => {
-  // const router = useRouter();
+  const router = useRouter();
   const deleteCustomer = api.customer.delete.useMutation({
     onSuccess: () => {
       toast({
         title: "Success",
         description: "Customer Deleted Successfully",
       });
-      // router.refresh();
+      router.refresh();
     },
     onError: (e) => {
       toast({

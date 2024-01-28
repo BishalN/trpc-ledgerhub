@@ -57,3 +57,7 @@ export const CustomerValidationSchema = z.object({
   phone: z.string().optional(),
   address: z.string().optional(),
 });
+
+export const UpdateCustomerValidationSchema = CustomerValidationSchema.merge(
+  z.object({ userId: z.string() }),
+);
