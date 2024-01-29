@@ -152,6 +152,7 @@ export function EditTransactionDialog({
 
   const onSubmit = form.handleSubmit(async (values) => {
     await updateTransaction.mutateAsync(values);
+    form.reset();
   });
 
   return (

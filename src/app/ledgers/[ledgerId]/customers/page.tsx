@@ -10,6 +10,7 @@ import { EmptyCustomerState } from "@/components/empty-customer-state";
 import { Input } from "@/components/ui/input";
 import { SearchIcon } from "lucide-react";
 import Link from "next/link";
+import { readableCurrency } from "../page";
 
 export default async function Home({
   params,
@@ -20,6 +21,9 @@ export default async function Home({
   const ledger = await api.ledger.getById.query({ id: params.ledgerId });
   const customers = await api.customer.getAllByLedgerId.query({
     ledgerId: params.ledgerId,
+  });
+  const aggregate = await api.customer.aggregate.query({
+    customerId: customers[0]?.id,
   });
 
   if (!ledger) return notFound();
@@ -49,11 +53,30 @@ export default async function Home({
             href={`/ledgers/${ledger.id}/customers/${customer.id}`}
           >
             <Card className="my-4">
-              <CardHeader className="flex flex-row items-baseline justify-between">
-                <div>{customer.name}</div>
-                <CustomerCardMenuDropdown customer={customer} />
+              <CardHeader className="">
+                <div className="flex flex-row items-baseline justify-between">
+                  <p className="text-2xl font-bold">{customer.name}</p>
+                  <CustomerCardMenuDropdown customer={customer} />
+                </div>
+                <p>
+                  <span className="text-xl font-semibold italic text-gray-500">
+                    {readableCurrency(aggregate.receivable)}{" "}
+                  </span>
+                  <span className="rounded-md bg-red-300 px-2 ">
+                    in receivables
+                  </span>
+                </p>
+                <p>
+                  <span className="text-xl font-semibold italic text-gray-500">
+                    {readableCurrency(aggregate.received)}{" "}
+                  </span>
+                  <span className="rounded-md bg-green-300 px-2 ">
+                    in received
+                  </span>
+                </p>
               </CardHeader>
               <CardFooter className="text-sm lowercase text-gray-400">
+                {/* // Last transaction at TODO */}
                 Created {formatDistanceToNow(customer.createdAt)} ago{" "}
               </CardFooter>
             </Card>

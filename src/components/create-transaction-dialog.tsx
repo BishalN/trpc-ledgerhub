@@ -58,6 +58,8 @@ import { useGetCustomerByName } from "@/hooks/useGetCustomerByName";
 import { useGetSupplierByName } from "@/hooks/useGetSupplierByName";
 import { useGetProductsByName } from "@/hooks/useGetProductsByName";
 import { Card, CardHeader } from "./ui/card";
+import { CreateCustomerDialog } from "./create-customer-dialog";
+import { CreateProductDialog } from "./create-product-dialog";
 
 export function CreateTransactionDialog() {
   const { ledgerId } = useParams();
@@ -114,7 +116,6 @@ export function CreateTransactionDialog() {
   const onSubmit = form.handleSubmit(async (values) => {
     await createTransaction.mutateAsync(values);
     form.reset();
-    // TODO: close the dialog
   });
 
   return (
@@ -251,7 +252,15 @@ export function CreateTransactionDialog() {
                             onValueChange={setCustomerName}
                             placeholder="Search customer..."
                           />
-                          <CommandEmpty>No customer found.</CommandEmpty>
+                          {/* Todo: 
+                          Handle autoclose of transaction dialog before create customer
+                          */}
+                          <CommandEmpty>
+                            <div className="space-y-2">
+                              <p>No customer found.</p>
+                              <CreateCustomerDialog />
+                            </div>
+                          </CommandEmpty>
                           <CommandGroup>
                             {customerResult?.data?.map((customer) => (
                               <CommandItem
@@ -373,7 +382,12 @@ export function CreateTransactionDialog() {
                           onValueChange={setProductName}
                           placeholder="Search product..."
                         />
-                        <CommandEmpty>No product found.</CommandEmpty>
+                        <CommandEmpty>
+                          <div className="space-y-3">
+                            <p>No product found.</p>
+                            <CreateProductDialog />
+                          </div>
+                        </CommandEmpty>
                         <CommandGroup>
                           {productResult?.data?.map((product) => (
                             <CommandItem

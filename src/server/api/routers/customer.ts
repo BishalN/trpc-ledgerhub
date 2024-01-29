@@ -5,6 +5,7 @@ import {
   CustomerValidationSchema,
   UpdateCustomerValidationSchema,
 } from "@/lib/validation";
+import { TransactionType } from "@prisma/client";
 
 export const customerRouter = createTRPCRouter({
   create: protectedProcedure
@@ -97,5 +98,44 @@ export const customerRouter = createTRPCRouter({
       return ctx.db.customer.delete({
         where: { id: input.customerId },
       });
+    }),
+
+  aggregate: protectedProcedure
+    .input(z.object({ customerId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const receivable = await ctx.db.transaction.aggregate({
+        where: {
+          customerId: input.customerId,
+          type: TransactionType.RECEIVABLE,
+        },
+        _sum: {
+          amount: true,
+        },
+      });
+
+      const txns = await ctx.db.transaction.findMany({
+        where: {
+          customerId: input.customerId,
+        },
+      });
+
+      console.log(`RReceivable is: `, receivable);
+      console.log(`txns is: `, txns);
+      console.log(`customerId:`, input.customerId);
+
+      const received = await ctx.db.transaction.aggregate({
+        where: {
+          customerId: input.customerId,
+          type: TransactionType.RECEIVED,
+        },
+        _sum: {
+          amount: true,
+        },
+      });
+
+      return {
+        receivable: receivable._sum.amount ?? 0,
+        received: received._sum.amount ?? 0,
+      };
     }),
 });
