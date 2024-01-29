@@ -8,7 +8,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { api } from "@/trpc/react";
@@ -25,21 +24,29 @@ import {
   FormMessage,
 } from "./ui/form";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { type Ledger } from "@prisma/client";
 
 export const LedgerValidationSchema = z.object({
   name: z.string({ required_error: "Name is required" }).min(3),
+  id: z.string(),
 });
 
-export function CreateLedgerDialog() {
+export function EditLedgerDialog({
+  ledger,
+  open,
+  setOpen,
+}: {
+  ledger: Ledger;
+  open: boolean;
+  setOpen: (open: boolean) => void;
+}) {
   const router = useRouter();
 
-  const [open, setOpen] = useState(false);
-  const createLedger = api.ledger.create.useMutation({
+  const updateLedger = api.ledger.update.useMutation({
     onSuccess: () => {
       toast({
         title: "Success",
-        description: "Ledger Created Successfully",
+        description: "Ledger Updated Successfully",
       });
 
       router.refresh();
@@ -55,21 +62,22 @@ export function CreateLedgerDialog() {
 
   const form = useZodForm({
     schema: LedgerValidationSchema,
+    defaultValues: {
+      name: ledger.name,
+      id: ledger.id,
+    },
   });
 
   const onSubmit = form.handleSubmit(async (values) => {
-    await createLedger.mutateAsync(values);
+    await updateLedger.mutateAsync(values);
     form.reset();
   });
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>Create Ledger</Button>
-      </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create Ledger</DialogTitle>
+          <DialogTitle>Edit Ledger</DialogTitle>
           <DialogDescription>
             Ledger allows you to manage your business transactions
           </DialogDescription>
@@ -98,7 +106,7 @@ export function CreateLedgerDialog() {
               )}
             />
             <DialogFooter className="my-4">
-              <Button type="submit">Submit</Button>
+              <Button type="submit">Update</Button>
             </DialogFooter>
           </form>
         </Form>
