@@ -10,6 +10,7 @@ import Link from "next/link";
 import { CreateProductDialog } from "@/components/create-product-dialog";
 import { EmptyProductState } from "@/components/empty-product-state";
 import { ProductCardMenuDropdown } from "@/components/product-card-menu-dropdown";
+import { readableCurrency } from "../page";
 
 export default async function Home({
   params,
@@ -47,12 +48,23 @@ export default async function Home({
             href={`/ledgers/${ledger.id}/products/${product.id}`}
           >
             <Card className="my-4">
-              <CardHeader className="flex flex-row items-baseline justify-between">
-                <div>{product.name}</div>
-                <ProductCardMenuDropdown product={product} />
+              <CardHeader className="">
+                <div className="flex flex-row items-baseline justify-between">
+                  <p className="text-2xl font-bold">{product.name}</p>
+                  <ProductCardMenuDropdown product={product} />
+                </div>
+                <div className="italic text-gray-500">
+                  <p>
+                    <span className="text-lg font-semibold">
+                      {readableCurrency(product.sellingPrice)}
+                    </span>{" "}
+                    selling price
+                  </p>
+                  <p>{product.stock} left in stock</p>
+                </div>
               </CardHeader>
               <CardFooter className="text-sm lowercase text-gray-400">
-                Created {formatDistanceToNow(product.createdAt)} ago{" "}
+                Created {formatDistanceToNow(product.createdAt)} ago
               </CardFooter>
             </Card>
           </Link>

@@ -155,8 +155,8 @@ export default async function LedgerPage({
                   </CardContent>
                 )}
                 <CardFooter>
-                  created {formatDistanceToNow(new Date(transaction.createdAt))}{" "}
-                  ago
+                  {/* // TODO updated at field */}
+                  created {formatDistanceToNow(transaction.createdAt)} ago
                 </CardFooter>
               </Card>
             );

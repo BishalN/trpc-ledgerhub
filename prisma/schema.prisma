@@ -14,18 +14,6 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    createdBy   User   @relation(fields: [createdById], references: [id])
-    createdById String
-
-    @@index([name])
-}
-
 // Necessary for Next auth
 model Account {
     id                String  @id @default(cuid())
@@ -61,9 +49,11 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
-    posts         Post[]
     ledgers      Ledger[]
     pereferences UserPreferences?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
 model VerificationToken {
@@ -145,6 +135,7 @@ model Transaction {
   supplierId    String?
 
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // having a json field that has the products and their quantities
   // { "products": [{ "id": "1", "quantity": 2, price: "" }, { "id": "2", "quantity": 3 }] }

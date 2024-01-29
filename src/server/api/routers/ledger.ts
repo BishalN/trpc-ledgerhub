@@ -89,6 +89,7 @@ export const ledgerRouter = createTRPCRouter({
       });
     }),
 
+  // TODO: Create and Use View instead of this appraoch
   aggregate: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
