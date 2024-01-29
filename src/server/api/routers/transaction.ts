@@ -15,7 +15,6 @@ export const transactionRouter = createTRPCRouter({
           amount: input.amount,
           remarks: input.remarks,
           type: input.type,
-          ledger: { connect: { id: input.ledgerId } },
           // TODO: understand how does this optional relationship works
           customer: input.customerId
             ? { connect: { id: input.customerId } }
@@ -23,6 +22,8 @@ export const transactionRouter = createTRPCRouter({
           supplier: input.supplierId
             ? { connect: { id: input.supplierId } }
             : undefined,
+          products: input.products,
+          ledger: { connect: { id: input.ledgerId } },
         },
       });
     }),

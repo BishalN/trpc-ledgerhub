@@ -37,8 +37,14 @@ import {
 import { type Product, TransactionType } from "@prisma/client";
 import { Textarea } from "./ui/textarea";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeftRight, Check, ChevronsUpDown } from "lucide-react";
-import React, { useState } from "react";
+import {
+  ArrowLeftRight,
+  Check,
+  ChevronsUpDown,
+  CrossIcon,
+  X,
+} from "lucide-react";
+import React, { useEffect, useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { cn } from "@/lib/utils";
 import {
@@ -51,11 +57,12 @@ import {
 import { useGetCustomerByName } from "@/hooks/useGetCustomerByName";
 import { useGetSupplierByName } from "@/hooks/useGetSupplierByName";
 import { useGetProductsByName } from "@/hooks/useGetProductsByName";
+import { Card, CardHeader } from "./ui/card";
 
 export function CreateTransactionDialog() {
-  // use params to get the ledger id
   const { ledgerId } = useParams();
   const router = useRouter();
+
   const [open, setOpen] = useState(false);
 
   const [customerName, setCustomerName] = useState("");
@@ -88,10 +95,11 @@ export function CreateTransactionDialog() {
     },
   });
 
+  // TODO: Handle the stocks of the products as well
   const form = useZodForm({
     schema: TransactionValidationSchema,
     defaultValues: {
-      amount: 0,
+      amount: 2, // if products is defined then amount is disabled and derived from products
       type: TransactionType.RECEIVED,
       remarks: "",
       ledgerId: String(ledgerId ?? ""),
@@ -125,26 +133,28 @@ export function CreateTransactionDialog() {
         <Form {...form}>
           <form className="space-y-4" onSubmit={onSubmit}>
             {/* // TODO: use a dollar sign icon */}
-            <FormField
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel htmlFor="amount" className="text-right">
-                    Amount
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      id="Amount"
-                      type="number"
-                      className="col-span-3"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {form.getValues("products").length === 0 && (
+              <FormField
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel htmlFor="amount" className="text-right">
+                      Amount
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        id="Amount"
+                        type="number"
+                        className="col-span-3"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <FormField
               control={form.control}
@@ -374,7 +384,11 @@ export function CreateTransactionDialog() {
                                 });
                                 form.setValue("products", [
                                   ...field.value!,
-                                  { id: product.id, quantity: 1 },
+                                  {
+                                    id: product.id,
+                                    quantity: 1,
+                                    price: product.sellingPrice,
+                                  },
                                 ]);
                               }}
                             >
@@ -394,19 +408,70 @@ export function CreateTransactionDialog() {
                     </PopoverContent>
                   </Popover>
                   <FormMessage />
-                  {/* fetch the product by id here */}
-                  {form.getValues("products")?.map((product) => (
-                    <div key={product.id}>
-                      {selectedProducts[product.id]?.name}@{" "}
-                      {selectedProducts[product.id]?.sellingPrice} x{" "}
-                      {product.quantity}{" "}
-                      <span className="text-gray-500">
-                        ={" $"}
-                        {selectedProducts[product.id]?.sellingPrice *
-                          product.quantity}
-                      </span>
+                  {form.getValues("products").length > 0 && (
+                    <div className="rounded-md bg-gray-100 px-2 py-1">
+                      <p className="font-semibold">Selected Products</p>
+                      {form.getValues("products").map((product) => (
+                        <Card key={product.id}>
+                          <CardHeader className="flex flex-row items-baseline space-x-2">
+                            <span>{selectedProducts[product.id]?.name} x </span>
+                            <input
+                              className="inline w-24 rounded-md border-2 border-gray-200 p-1"
+                              placeholder="Quantity"
+                              type="number"
+                              value={product.quantity}
+                              onChange={(e) => {
+                                const newProducts = form
+                                  .getValues("products")
+                                  ?.map((p) => {
+                                    if (p.id === product.id) {
+                                      return {
+                                        ...p,
+                                        quantity: Number(e.target.value),
+                                      };
+                                    }
+                                    return p;
+                                  });
+                                form.setValue("products", newProducts);
+                              }}
+                            />
+                            <span>
+                              {" "}
+                              ={" $"}
+                              {selectedProducts[product?.id]?.sellingPrice *
+                                product.quantity}
+                            </span>
+                            <Button
+                              variant="outline"
+                              onClick={() => {
+                                const newProducts = form
+                                  .getValues("products")
+                                  ?.filter((p) => p.id !== product.id);
+                                form.setValue("products", newProducts);
+                              }}
+                            >
+                              <X className="h-6 w-6 text-gray-400" />
+                            </Button>
+                          </CardHeader>
+                        </Card>
+                      ))}
+                      <div className="py-2 font-bold">
+                        <p className="inline">Total Amount = </p>
+                        <p className="inline">
+                          $
+                          {form
+                            .getValues("products")
+                            ?.reduce(
+                              (acc, curr) =>
+                                acc +
+                                selectedProducts[curr.id].sellingPrice *
+                                  curr.quantity,
+                              0,
+                            )}
+                        </p>
+                      </div>
                     </div>
-                  ))}
+                  )}
                 </FormItem>
               )}
             ></FormField>

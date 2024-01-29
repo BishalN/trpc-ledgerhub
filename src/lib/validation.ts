@@ -15,23 +15,66 @@ export const ProductUpdateValidationSchema = ProductValidationSchema.merge(
   z.object({ id: z.string() }),
 );
 
-export const TransactionValidationSchema = z.object({
-  amount: z.coerce.number().min(1),
-  // TODO: use directly from prisma client type
-  type: z.enum(["RECEIVABLE", "PAYABLE", "RECEIVED", "PAID"]),
-  remarks: z.string().optional(),
-  customerId: z.string().optional(),
-  ledgerId: z.string(),
-  supplierId: z.string().optional(),
-  products: z
-    .array(z.object({ id: z.string(), quantity: z.coerce.number().min(1) }))
-    .optional(),
-  // TODO: add refine to handle the case when type is receivable or payable then customerId is required
-  // else supplierId is required
-});
+// TODO: add transform to handle the case when type is receivable or payable then customerId is required
+// else supplierId is required
+export const TransactionValidationSchema = z
+  .object({
+    amount: z.coerce.number().min(1),
+    type: z.enum(["RECEIVABLE", "PAYABLE", "RECEIVED", "PAID"]),
+    remarks: z.string().optional(),
+    customerId: z.string().optional(),
+    ledgerId: z.string(),
+    supplierId: z.string().optional(),
+    products: z
+      .array(
+        z.object({
+          id: z.string(),
+          quantity: z.coerce.number().min(1),
+          price: z.coerce.number().min(1),
+        }),
+      )
+      .optional(),
+  })
+  .transform((data) => {
+    if (data.products) {
+      const amount = data.products.reduce(
+        (acc, curr) => acc + curr.quantity * curr.price,
+        0,
+      );
+      return { ...data, amount };
+    }
+    return data;
+  });
 
-export const UpdateTransactionValidationSchema =
-  TransactionValidationSchema.merge(z.object({ transactionId: z.string() }));
+export const UpdateTransactionValidationSchema = z
+  .object({
+    transactionId: z.string(),
+    amount: z.coerce.number().min(1),
+    type: z.enum(["RECEIVABLE", "PAYABLE", "RECEIVED", "PAID"]),
+    remarks: z.string().optional(),
+    customerId: z.string().optional(),
+    ledgerId: z.string(),
+    supplierId: z.string().optional(),
+    products: z
+      .array(
+        z.object({
+          id: z.string(),
+          quantity: z.coerce.number().min(1),
+          price: z.coerce.number().min(1),
+        }),
+      )
+      .optional(),
+  })
+  .transform((data) => {
+    if (data.products) {
+      const amount = data.products.reduce(
+        (acc, curr) => acc + curr.quantity * curr.price,
+        0,
+      );
+      return { ...data, amount };
+    }
+    return data;
+  });
 
 export type TransactionType = z.infer<typeof TransactionValidationSchema>;
 
