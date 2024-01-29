@@ -25,7 +25,22 @@ export const ledgerRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       return ctx.db.ledger.findUnique({
         include: {
-          transactions: true,
+          transactions: {
+            include: {
+              customer: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+              supplier: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
         },
         where: { id: input.id },
       });

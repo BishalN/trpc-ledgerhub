@@ -12,6 +12,8 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
+import { TransactionType } from "@prisma/client";
+import NextLink from "next/link";
 
 export default async function LedgerPage({
   params,
@@ -22,12 +24,46 @@ export default async function LedgerPage({
   const ledger = await api.ledger.getById.query({ id: params.ledgerId });
   if (!ledger) return notFound();
 
+  const txnTypeToLabelAndColor = {
+    [TransactionType.PAID]: { label: "Paid", color: "bg-green-300" },
+    [TransactionType.PAYABLE]: { label: "Payable", color: "bg-red-300" },
+    [TransactionType.RECEIVABLE]: {
+      label: "Receivable",
+      color: "bg-red-300",
+    },
+    [TransactionType.RECEIVED]: { label: "Received", color: "bg-green-300" },
+  };
+
+  // TODO: comeup with better name for this
+  const generateHeadline = (transaction: (typeof ledger.transactions)[0]) => {
+    if (!transaction.customerId && !transaction.supplierId) {
+      return { ...txnTypeToLabelAndColor[transaction.type], link: "#" };
+    } else if (transaction.customerId) {
+      return {
+        label:
+          txnTypeToLabelAndColor[transaction.type].label +
+          " from " +
+          " " +
+          transaction.customer?.name,
+        link: `/ledgers/${params.ledgerId}/customers/${transaction.customerId}`,
+      };
+    } else if (transaction.supplierId) {
+      return {
+        label:
+          txnTypeToLabelAndColor[transaction.type].label +
+          " to " +
+          " " +
+          transaction.supplier?.name,
+        link: `/ledgers/${params.ledgerId}/suppliers/${transaction.supplierId}`,
+      };
+    }
+  };
+
   return (
     <main className="text-white">
       <NavBar session={session} />
       <CreateTransactionDialog />
       <h1 className="my-4 text-4xl font-bold">{ledger.name}</h1>
-
       <p className="text-lg font-semibold">Recent Transactions</p>
       {ledger.transactions.length > 0 ? (
         <div className="space-y-4">
@@ -35,8 +71,16 @@ export default async function LedgerPage({
             return (
               <Card key={transaction.id}>
                 <CardHeader className="flex flex-row items-baseline justify-between">
-                  <div>
-                    $ {transaction.amount} {transaction.type}
+                  <div className="space-x-2">
+                    <span>$ {transaction.amount}</span>
+                    <NextLink
+                      href={generateHeadline(transaction).link}
+                      className={`rounded-md ${
+                        txnTypeToLabelAndColor[transaction.type].color
+                      } px-1`}
+                    >
+                      {generateHeadline(transaction)?.label}
+                    </NextLink>
                   </div>
                   <TransactionItemDropDownMenu transaction={transaction} />
                 </CardHeader>

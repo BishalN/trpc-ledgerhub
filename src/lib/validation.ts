@@ -36,7 +36,7 @@ export const TransactionValidationSchema = z
       .optional(),
   })
   .transform((data) => {
-    if (data.products) {
+    if (data.products && data.products?.length > 0) {
       const amount = data.products.reduce(
         (acc, curr) => acc + curr.quantity * curr.price,
         0,
@@ -66,7 +66,7 @@ export const UpdateTransactionValidationSchema = z
       .optional(),
   })
   .transform((data) => {
-    if (data.products) {
+    if (data.products && data.products?.length > 0) {
       const amount = data.products.reduce(
         (acc, curr) => acc + curr.quantity * curr.price,
         0,

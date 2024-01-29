@@ -57,8 +57,6 @@ export function EditProductDialog({
     },
   });
 
-  console.log(`product in edit dialog ${JSON.stringify(product, null, 2)}`);
-
   const form = useZodForm({
     schema: ProductUpdateValidationSchema,
     defaultValues: {
@@ -72,8 +70,6 @@ export function EditProductDialog({
       id: product.id,
     },
   });
-
-  console.log(form.formState.errors);
 
   const onSubmit = form.handleSubmit(async (values) => {
     await createProduct.mutateAsync(values);

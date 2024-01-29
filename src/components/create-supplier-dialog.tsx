@@ -66,7 +66,6 @@ export function CreateSupplierDialog() {
   });
 
   const onSubmit = form.handleSubmit(async (values) => {
-    console.log(values);
     await createSupplier.mutateAsync(values);
     form.reset();
     // TODO: close the dialog

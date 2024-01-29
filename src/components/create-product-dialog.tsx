@@ -64,8 +64,6 @@ export function CreateProductDialog() {
     },
   });
 
-  console.log(form.formState.errors);
-
   const onSubmit = form.handleSubmit(async (values) => {
     await createProduct.mutateAsync(values);
     form.reset();

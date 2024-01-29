@@ -40,8 +40,6 @@ export function EditCustomerDialog({
 }) {
   const router = useRouter();
 
-  console.log(customer);
-
   const updateCustomer = api.customer.update.useMutation({
     onSuccess: () => {
       toast({
@@ -72,10 +70,7 @@ export function EditCustomerDialog({
     },
   });
 
-  console.log(form.formState.errors);
-
   const onSubmit = form.handleSubmit(async (values) => {
-    console.log(values);
     await updateCustomer.mutateAsync(values);
   });
 

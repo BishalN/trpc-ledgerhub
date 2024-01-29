@@ -20,8 +20,6 @@ export default async function Home({
   const ledger = await api.ledger.getById.query({ id: params.ledgerId });
   const products = await api.product.getAll.query();
 
-  console.log(products);
-
   if (!ledger) return notFound();
   return (
     <main>

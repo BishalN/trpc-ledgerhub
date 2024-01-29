@@ -109,6 +109,8 @@ export function CreateTransactionDialog() {
     },
   });
 
+  console.log(form.formState.errors);
+
   const onSubmit = form.handleSubmit(async (values) => {
     await createTransaction.mutateAsync(values);
     form.reset();

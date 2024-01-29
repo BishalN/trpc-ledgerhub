@@ -66,7 +66,6 @@ export function CreateCustomerDialog() {
   });
 
   const onSubmit = form.handleSubmit(async (values) => {
-    console.log(values);
     await createCustomer.mutateAsync(values);
     form.reset();
     // TODO: close the dialog

@@ -91,8 +91,6 @@ export function EditTransactionDialog({
     },
   );
 
-  console.log(selectedCustomerResult.data?.name);
-
   const selectedSupplierResult = api.supplier.getBySupplierId.useQuery(
     { supplierId: transaction.supplierId ?? "" },
     {
