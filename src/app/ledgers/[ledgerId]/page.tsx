@@ -16,6 +16,14 @@ import { TransactionType } from "@prisma/client";
 import NextLink from "next/link";
 import { type TransactionProductType } from "@/lib/validation";
 
+export const readableCurrency = (amount: number) => {
+  const formattedValue = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(amount);
+  return formattedValue;
+};
+
 export default async function LedgerPage({
   params,
 }: {
@@ -23,6 +31,7 @@ export default async function LedgerPage({
 }) {
   const session = await getServerAuthSession();
   const ledger = await api.ledger.getById.query({ id: params.ledgerId });
+  const aggregate = await api.ledger.aggregate.query({ id: params.ledgerId });
 
   if (!ledger) return notFound();
 
@@ -66,6 +75,43 @@ export default async function LedgerPage({
       <NavBar session={session} />
       <CreateTransactionDialog />
       <h1 className="my-4 text-4xl font-bold">{ledger.name}</h1>
+      <div className="my-12 rounded-md bg-gray-100 px-6 py-4 text-black ">
+        {/* <p className="text-2xl font-bold">Results:</p> */}
+        <div id="aggregates" className=" grid grid-cols-2 gap-2 ">
+          <p>
+            <span className="text-2xl font-bold">
+              {readableCurrency(aggregate.payable)}
+            </span>{" "}
+            <span className="rounded-md bg-red-300 px-1 text-gray-600">
+              in payables
+            </span>
+          </p>
+          <p>
+            <span className="text-2xl font-bold">
+              {readableCurrency(aggregate.paid)}
+            </span>{" "}
+            <span className="rounded-md bg-green-300 px-1 text-gray-600">
+              in paid
+            </span>
+          </p>
+          <p>
+            <span className="text-2xl font-bold">
+              {readableCurrency(aggregate.receivable)}
+            </span>{" "}
+            <span className="rounded-md bg-green-300 px-1 text-gray-600">
+              in receivables
+            </span>
+          </p>
+          <p>
+            <span className="text-2xl font-bold">
+              {readableCurrency(aggregate.received)}
+            </span>{" "}
+            <span className="rounded-md bg-green-300 px-1 text-gray-600">
+              in received
+            </span>
+          </p>
+        </div>
+      </div>
       <p className="text-lg font-semibold">Recent Transactions</p>
       {ledger.transactions.length > 0 ? (
         <div className="space-y-4">
@@ -77,7 +123,7 @@ export default async function LedgerPage({
                 <CardHeader className="flex flex-row items-baseline justify-between">
                   <div className="space-x-2">
                     <span className="text-2xl font-bold">
-                      ${transaction.amount}
+                      {readableCurrency(transaction.amount)}
                     </span>
                     <NextLink
                       href={generateHeadline(transaction).link}
@@ -100,8 +146,8 @@ export default async function LedgerPage({
                         <p className="text-semibold">Products:</p>
                         {transactionProducts.map((prod) => (
                           <p key={prod.id}>
-                            {prod.name ?? prod.id} x {prod.quantity} = $
-                            {prod.price * prod.quantity}{" "}
+                            {prod.name ?? prod.id} x {prod.quantity} ={" "}
+                            {readableCurrency(prod.price * prod.quantity)}
                           </p>
                         ))}
                       </div>

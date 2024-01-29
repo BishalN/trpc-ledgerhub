@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import { TransactionType } from "@prisma/client";
 
 export const ledgerRouter = createTRPCRouter({
   create: protectedProcedure
@@ -86,5 +87,38 @@ export const ledgerRouter = createTRPCRouter({
       return ctx.db.ledger.delete({
         where: { id: input.id },
       });
+    }),
+
+  aggregate: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const transactions = await ctx.db.transaction.findMany({
+        where: { ledgerId: input.id },
+        select: {
+          amount: true,
+          type: true,
+        },
+      });
+
+      const aggregate = {
+        payable: 0,
+        receivable: 0,
+        paid: 0,
+        received: 0,
+      };
+
+      transactions.forEach((transaction) => {
+        if (transaction.type === TransactionType.PAYABLE) {
+          aggregate.payable += transaction.amount;
+        } else if (transaction.type === TransactionType.RECEIVABLE) {
+          aggregate.receivable += transaction.amount;
+        } else if (transaction.type === TransactionType.PAID) {
+          aggregate.paid += transaction.amount;
+        } else if (transaction.type === TransactionType.RECEIVED) {
+          aggregate.received += transaction.amount;
+        }
+      });
+
+      return aggregate;
     }),
 });
