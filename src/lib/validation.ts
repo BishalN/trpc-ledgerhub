@@ -14,6 +14,18 @@ export const ProductValidationSchema = z.object({
 export const ProductUpdateValidationSchema = ProductValidationSchema.merge(
   z.object({ id: z.string() }),
 );
+export const transactionProductType = z
+  .array(
+    z.object({
+      id: z.string(),
+      quantity: z.coerce.number().min(1),
+      price: z.coerce.number().min(1),
+      name: z.string(),
+    }),
+  )
+  .optional();
+
+export type TransactionProductType = z.infer<typeof transactionProductType>;
 
 // TODO: add transform to handle the case when type is receivable or payable then customerId is required
 // else supplierId is required
@@ -25,15 +37,7 @@ export const TransactionValidationSchema = z
     customerId: z.string().optional(),
     ledgerId: z.string(),
     supplierId: z.string().optional(),
-    products: z
-      .array(
-        z.object({
-          id: z.string(),
-          quantity: z.coerce.number().min(1),
-          price: z.coerce.number().min(1),
-        }),
-      )
-      .optional(),
+    products: transactionProductType,
   })
   .transform((data) => {
     if (data.products && data.products?.length > 0) {
@@ -55,15 +59,7 @@ export const UpdateTransactionValidationSchema = z
     customerId: z.string().optional(),
     ledgerId: z.string(),
     supplierId: z.string().optional(),
-    products: z
-      .array(
-        z.object({
-          id: z.string(),
-          quantity: z.coerce.number().min(1),
-          price: z.coerce.number().min(1),
-        }),
-      )
-      .optional(),
+    products: transactionProductType,
   })
   .transform((data) => {
     if (data.products && data.products?.length > 0) {

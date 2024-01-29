@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/card";
 import { TransactionType } from "@prisma/client";
 import NextLink from "next/link";
+import { type TransactionProductType } from "@/lib/validation";
 
 export default async function LedgerPage({
   params,
@@ -22,6 +23,7 @@ export default async function LedgerPage({
 }) {
   const session = await getServerAuthSession();
   const ledger = await api.ledger.getById.query({ id: params.ledgerId });
+
   if (!ledger) return notFound();
 
   const txnTypeToLabelAndColor = {
@@ -68,11 +70,15 @@ export default async function LedgerPage({
       {ledger.transactions.length > 0 ? (
         <div className="space-y-4">
           {ledger.transactions.map((transaction) => {
+            const transactionProducts =
+              transaction.products as TransactionProductType;
             return (
               <Card key={transaction.id}>
                 <CardHeader className="flex flex-row items-baseline justify-between">
                   <div className="space-x-2">
-                    <span>$ {transaction.amount}</span>
+                    <span className="text-2xl font-bold">
+                      ${transaction.amount}
+                    </span>
                     <NextLink
                       href={generateHeadline(transaction).link}
                       className={`rounded-md ${
@@ -89,6 +95,17 @@ export default async function LedgerPage({
                     <div className="text-sm text-gray-500">
                       {transaction.remarks}
                     </div>
+                    {transactionProducts && transactionProducts.length > 0 && (
+                      <div className="mt-2 rounded-md bg-gray-200 p-2 text-muted-foreground">
+                        <p className="text-semibold">Products:</p>
+                        {transactionProducts.map((prod) => (
+                          <p key={prod.id}>
+                            {prod.name ?? prod.id} x {prod.quantity} = $
+                            {prod.price * prod.quantity}{" "}
+                          </p>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 )}
                 <CardFooter>

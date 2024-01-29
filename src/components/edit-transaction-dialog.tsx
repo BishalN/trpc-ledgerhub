@@ -145,6 +145,7 @@ export function EditTransactionDialog({
         id: product.id,
         quantity: product.quantity,
         price: product.price,
+        name: product.name,
       })),
     },
   });
@@ -420,6 +421,7 @@ export function EditTransactionDialog({
                                     id: product.id,
                                     quantity: 1,
                                     price: product.sellingPrice,
+                                    name: product.name,
                                   },
                                 ]);
                               }}

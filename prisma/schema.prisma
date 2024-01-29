@@ -147,7 +147,7 @@ model Transaction {
   createdAt DateTime @default(now())
 
   // having a json field that has the products and their quantities
-  // { "products": [{ "id": "1", "quantity": 2 }, { "id": "2", "quantity": 3 }] }
+  // { "products": [{ "id": "1", "quantity": 2, price: "" }, { "id": "2", "quantity": 3 }] }
   // TODO: validate with zod
   products    Json[] // optional
 

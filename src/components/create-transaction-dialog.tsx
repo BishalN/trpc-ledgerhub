@@ -390,6 +390,7 @@ export function CreateTransactionDialog() {
                                     id: product.id,
                                     quantity: 1,
                                     price: product.sellingPrice,
+                                    name: product.name,
                                   },
                                 ]);
                               }}

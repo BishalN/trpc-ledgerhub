@@ -23,7 +23,7 @@ export const ledgerRouter = createTRPCRouter({
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      return ctx.db.ledger.findUnique({
+      const res = await ctx.db.ledger.findUnique({
         include: {
           transactions: {
             include: {
@@ -44,6 +44,8 @@ export const ledgerRouter = createTRPCRouter({
         },
         where: { id: input.id },
       });
+
+      return res;
     }),
 
   update: protectedProcedure
