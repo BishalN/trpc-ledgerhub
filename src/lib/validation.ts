@@ -101,3 +101,9 @@ export const SupplierValidationSchema = z.object({
 export const UpdateSupplierValidationSchema = SupplierValidationSchema.merge(
   z.object({ supplierId: z.string() }),
 );
+
+export const contactValidationSchema = z.object({
+  email: z.string().optional(),
+  phone: z.string().optional(),
+  address: z.string().optional(),
+});

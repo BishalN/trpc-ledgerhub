@@ -22,6 +22,8 @@ export default async function Home({
   const customers = await api.customer.getAllByLedgerId.query({
     ledgerId: params.ledgerId,
   });
+  // TODO: fix use aggregates by customerIds
+  // Not showing aggregates on card makes even more sense here
   const aggregate = await api.customer.aggregate.query({
     customerId: customers[0]?.id,
   });

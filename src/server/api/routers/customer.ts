@@ -113,16 +113,6 @@ export const customerRouter = createTRPCRouter({
         },
       });
 
-      const txns = await ctx.db.transaction.findMany({
-        where: {
-          customerId: input.customerId,
-        },
-      });
-
-      console.log(`RReceivable is: `, receivable);
-      console.log(`txns is: `, txns);
-      console.log(`customerId:`, input.customerId);
-
       const received = await ctx.db.transaction.aggregate({
         where: {
           customerId: input.customerId,
@@ -137,5 +127,28 @@ export const customerRouter = createTRPCRouter({
         receivable: receivable._sum.amount ?? 0,
         received: received._sum.amount ?? 0,
       };
+    }),
+
+  recentTransactions: protectedProcedure
+    .input(
+      z.object({
+        customerId: z.string(),
+        skip: z.number().optional().default(0),
+        take: z.number().optional().default(10),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const txns = await ctx.db.transaction.findMany({
+        where: {
+          customerId: input.customerId,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        skip: input.skip,
+        take: input.take,
+      });
+
+      return txns;
     }),
 });

@@ -47,6 +47,7 @@ export default async function Home({
         <p className="my-4 font-semibold text-gray-600">
           {product.description}
         </p>
+        {/* TODO: Add a way to add suppliers to a product */}
         {/* <div>
           {product.suppliers.length > 0 ? (
             product.suppliers.map((supplier) => (

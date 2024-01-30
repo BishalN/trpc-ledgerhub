@@ -12,9 +12,10 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { TransactionType } from "@prisma/client";
+import { type Transaction, TransactionType } from "@prisma/client";
 import NextLink from "next/link";
 import { type TransactionProductType } from "@/lib/validation";
+import React from "react";
 
 export const readableCurrency = (amount: number) => {
   const formattedValue = new Intl.NumberFormat("en-US", {
@@ -22,6 +23,64 @@ export const readableCurrency = (amount: number) => {
     currency: "USD",
   }).format(amount);
   return formattedValue;
+};
+
+export const txnTypeToLabelAndColor = {
+  [TransactionType.PAID]: { label: "Paid", color: "bg-green-300" },
+  [TransactionType.PAYABLE]: { label: "Payable", color: "bg-red-300" },
+  [TransactionType.RECEIVABLE]: {
+    label: "Receivable",
+    color: "bg-red-300",
+  },
+  [TransactionType.RECEIVED]: { label: "Received", color: "bg-green-300" },
+};
+
+// TODO: use types from router directly
+export type Txn = {
+  id: string;
+  amount: number;
+  remarks: string;
+  createdAt: Date;
+  updatedAt: Date;
+  type: TransactionType;
+  customerId: string | null;
+  supplierId: string | null;
+  ledgerId: string;
+  customer: {
+    id: string;
+    name: string;
+  } | null;
+  supplier: {
+    id: string;
+    name: string;
+  } | null;
+  products: TransactionProductType;
+};
+
+// TODO: comeup with better name for this
+export const generateHeadline = (transaction: Txn) => {
+  // TODO: fetch customer or supplier name here
+  if (!transaction.customerId && !transaction.supplierId) {
+    return { ...txnTypeToLabelAndColor[transaction.type], link: "#" };
+  } else if (transaction.customerId) {
+    return {
+      label:
+        txnTypeToLabelAndColor[transaction.type].label +
+        " from " +
+        " " +
+        transaction.customer?.name,
+      link: `/ledgers/${transaction.ledgerId}/customers/${transaction.customerId}`,
+    };
+  } else if (transaction.supplierId) {
+    return {
+      label:
+        txnTypeToLabelAndColor[transaction.type].label +
+        " to " +
+        " " +
+        transaction.supplier?.name,
+      link: `/ledgers/${transaction.ledgerId}/suppliers/${transaction.supplierId}`,
+    };
+  }
 };
 
 export default async function LedgerPage({
@@ -34,41 +93,6 @@ export default async function LedgerPage({
   const aggregate = await api.ledger.aggregate.query({ id: params.ledgerId });
 
   if (!ledger) return notFound();
-
-  const txnTypeToLabelAndColor = {
-    [TransactionType.PAID]: { label: "Paid", color: "bg-green-300" },
-    [TransactionType.PAYABLE]: { label: "Payable", color: "bg-red-300" },
-    [TransactionType.RECEIVABLE]: {
-      label: "Receivable",
-      color: "bg-red-300",
-    },
-    [TransactionType.RECEIVED]: { label: "Received", color: "bg-green-300" },
-  };
-
-  // TODO: comeup with better name for this
-  const generateHeadline = (transaction: (typeof ledger.transactions)[0]) => {
-    if (!transaction.customerId && !transaction.supplierId) {
-      return { ...txnTypeToLabelAndColor[transaction.type], link: "#" };
-    } else if (transaction.customerId) {
-      return {
-        label:
-          txnTypeToLabelAndColor[transaction.type].label +
-          " from " +
-          " " +
-          transaction.customer?.name,
-        link: `/ledgers/${params.ledgerId}/customers/${transaction.customerId}`,
-      };
-    } else if (transaction.supplierId) {
-      return {
-        label:
-          txnTypeToLabelAndColor[transaction.type].label +
-          " to " +
-          " " +
-          transaction.supplier?.name,
-        link: `/ledgers/${params.ledgerId}/suppliers/${transaction.supplierId}`,
-      };
-    }
-  };
 
   return (
     <main className="text-white">
@@ -116,49 +140,8 @@ export default async function LedgerPage({
       {ledger.transactions.length > 0 ? (
         <div className="space-y-4">
           {ledger.transactions.map((transaction) => {
-            const transactionProducts =
-              transaction.products as TransactionProductType;
             return (
-              <Card key={transaction.id}>
-                <CardHeader className="flex flex-row items-baseline justify-between">
-                  <div className="space-x-2">
-                    <span className="text-2xl font-bold">
-                      {readableCurrency(transaction.amount)}
-                    </span>
-                    <NextLink
-                      href={generateHeadline(transaction).link}
-                      className={`rounded-md ${
-                        txnTypeToLabelAndColor[transaction.type].color
-                      } px-1`}
-                    >
-                      {generateHeadline(transaction)?.label}
-                    </NextLink>
-                  </div>
-                  <TransactionItemDropDownMenu transaction={transaction} />
-                </CardHeader>
-                {transaction.remarks && (
-                  <CardContent>
-                    <div className="text-sm text-gray-500">
-                      {transaction.remarks}
-                    </div>
-                    {transactionProducts && transactionProducts.length > 0 && (
-                      <div className="mt-2 rounded-md bg-gray-200 p-2 text-muted-foreground">
-                        <p className="text-semibold">Products:</p>
-                        {transactionProducts.map((prod) => (
-                          <p key={prod.id}>
-                            {prod.name ?? prod.id} x {prod.quantity} ={" "}
-                            {readableCurrency(prod.price * prod.quantity)}
-                          </p>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                )}
-                <CardFooter>
-                  {/* // TODO updated at field */}
-                  created {formatDistanceToNow(transaction.createdAt)} ago
-                </CardFooter>
-              </Card>
+              <TransactionCard key={transaction.id} transaction={transaction} />
             );
           })}
         </div>
@@ -168,3 +151,52 @@ export default async function LedgerPage({
     </main>
   );
 }
+
+export const TransactionCard = ({
+  transaction,
+}: {
+  transaction: Transaction;
+}) => {
+  // TODO: this is bad, fix it
+  const transactionProducts = transaction.products as TransactionProductType;
+  return (
+    <Card key={transaction.id}>
+      <CardHeader className="flex flex-row items-baseline justify-between">
+        <div className="space-x-2">
+          <span className="text-2xl font-bold">
+            {readableCurrency(transaction.amount)}
+          </span>
+          <NextLink
+            href={generateHeadline(transaction).link}
+            className={`rounded-md ${
+              txnTypeToLabelAndColor[transaction.type].color
+            } px-1`}
+          >
+            {generateHeadline(transaction)?.label}
+          </NextLink>
+        </div>
+        <TransactionItemDropDownMenu transaction={transaction} />
+      </CardHeader>
+      {transaction.remarks && (
+        <CardContent>
+          <div className="text-sm text-gray-500">{transaction.remarks}</div>
+          {transactionProducts && transactionProducts.length > 0 && (
+            <div className="mt-2 rounded-md bg-gray-200 p-2 text-muted-foreground">
+              <p className="text-semibold">Products:</p>
+              {transactionProducts.map((prod) => (
+                <p key={prod.id}>
+                  {prod.name ?? prod.id} x {prod.quantity} ={" "}
+                  {readableCurrency(prod.price * prod.quantity)}
+                </p>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      )}
+      <CardFooter>
+        {/* // TODO updated at field */}
+        created {formatDistanceToNow(transaction.createdAt)} ago
+      </CardFooter>
+    </Card>
+  );
+};

@@ -4,6 +4,7 @@ import { transactionRouter } from "./routers/transaction";
 import { customerRouter } from "./routers/customer";
 import { productRouter } from "./routers/product";
 import { supplierRouter } from "./routers/supplier";
+import { type inferProcedureOutput } from "@trpc/server";
 
 /**
  * This is the primary router for your server.
@@ -20,3 +21,12 @@ export const appRouter = createTRPCRouter({
 
 // export type definition of API
 export type AppRouter = typeof appRouter;
+
+// export procedure type definition of API
+export type AppRouterProcedure = AppRouter["_def"]["procedures"];
+
+// export type of ledger procedure
+export type LedgerProcedure = AppRouterProcedure["ledger"];
+
+// export type of output of ledger procedure
+export type LPGetByIdOutput = inferProcedureOutput<LedgerProcedure["getById"]>;

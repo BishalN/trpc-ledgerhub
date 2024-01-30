@@ -50,7 +50,9 @@ export default async function Home({
           >
             <Card className="my-4">
               <CardHeader className="flex flex-row items-baseline justify-between">
-                <div>{supplier.name}</div>
+                <div>
+                  <p className="text-xl font-bold">{supplier.name}</p>
+                </div>
                 <SupplierMenuDropdown supplier={supplier} />
               </CardHeader>
               <CardFooter className="text-sm lowercase text-gray-400">

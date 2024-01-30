@@ -5,6 +5,7 @@ import {
   SupplierValidationSchema,
   UpdateSupplierValidationSchema,
 } from "@/lib/validation";
+import { TransactionType } from "@prisma/client";
 
 export const supplierRouter = createTRPCRouter({
   create: protectedProcedure
@@ -108,5 +109,57 @@ export const supplierRouter = createTRPCRouter({
       return ctx.db.supplier.delete({
         where: { id: input.supplierId },
       });
+    }),
+
+  aggregate: protectedProcedure
+    .input(z.object({ supplierId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const payable = await ctx.db.transaction.aggregate({
+        where: {
+          supplierId: input.supplierId,
+          type: TransactionType.PAYABLE,
+        },
+        _sum: {
+          amount: true,
+        },
+      });
+
+      const paid = await ctx.db.transaction.aggregate({
+        where: {
+          supplierId: input.supplierId,
+          type: TransactionType.PAID,
+        },
+        _sum: {
+          amount: true,
+        },
+      });
+
+      return {
+        payable: payable._sum.amount ?? 0,
+        paid: paid._sum.amount ?? 0,
+      };
+    }),
+
+  recentTransactions: protectedProcedure
+    .input(
+      z.object({
+        supplierId: z.string(),
+        skip: z.number().optional().default(0),
+        take: z.number().optional().default(10),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const txns = await ctx.db.transaction.findMany({
+        where: {
+          supplierId: input.supplierId,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        skip: input.skip,
+        take: input.take,
+      });
+
+      return txns;
     }),
 });
