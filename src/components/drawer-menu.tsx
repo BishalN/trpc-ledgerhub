@@ -1,6 +1,5 @@
 import * as React from "react";
 import { Factory, Menu, ScanLine, User } from "lucide-react";
-import NextLink from "next/link";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -10,6 +9,7 @@ import {
   DrawerFooter,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { useRouter } from "next/navigation";
 
 export function DrawerMenu({ ledgerId }: { ledgerId: string }) {
   const MenuData = [
@@ -30,6 +30,8 @@ export function DrawerMenu({ ledgerId }: { ledgerId: string }) {
     },
   ];
 
+  const router = useRouter();
+
   return (
     <Drawer>
       <DrawerTrigger asChild>
@@ -40,11 +42,14 @@ export function DrawerMenu({ ledgerId }: { ledgerId: string }) {
           <DrawerFooter>
             {MenuData.map((item) => (
               <DrawerClose key={item.label} asChild>
-                <Button variant="outline">
-                  <NextLink href={item.href} passHref>
-                    <item.Icon className="mr-2 inline" />
-                    {item.label}
-                  </NextLink>
+                <Button
+                  onClick={() => {
+                    router.push(item.href);
+                  }}
+                  variant="outline"
+                >
+                  <item.Icon className="mr-2 inline" />
+                  {item.label}
                 </Button>
               </DrawerClose>
             ))}
