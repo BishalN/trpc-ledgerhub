@@ -12,10 +12,11 @@ import { LedgerCardMenuDropdown } from "@/components/ledger-card-menu-dropdown";
 
 export default async function Home() {
   const session = await getServerAuthSession();
-  const ledgers = await api.ledger.getAll.query();
-
+  // TODO: use middleware instead of this
   // redirect to login if not logged in
   if (!session?.user) return redirect("/api/auth/signin");
+
+  const ledgers = await api.ledger.getAll.query();
 
   return (
     <main>

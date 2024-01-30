@@ -1,4 +1,4 @@
-import { CreditCard, LogOut, Settings, User } from "lucide-react";
+import { BookDashed, LogOut, Settings, User } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -7,11 +7,13 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { type getServerAuthSession } from "@/server/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+
+import NextLink from "next/link";
+import { signOut } from "next-auth/react";
 
 export function UserDropDown({
   session,
@@ -30,27 +32,30 @@ export function UserDropDown({
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
+          <NextLink href="/">
+            <DropdownMenuItem>
+              <BookDashed className="mr-2 h-4 w-4" />
+              <span>Dashboard</span>
+            </DropdownMenuItem>
+          </NextLink>
           <DropdownMenuItem>
             <User className="mr-2 h-4 w-4" />
             <span>Profile</span>
-            <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <CreditCard className="mr-2 h-4 w-4" />
-            <span>Billing</span>
-            <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem>
             <Settings className="mr-2 h-4 w-4" />
             <span>Settings</span>
-            <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+
+        <DropdownMenuItem
+          onClick={() => {
+            void signOut({ callbackUrl: window.location.origin });
+          }}
+        >
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
-          <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
